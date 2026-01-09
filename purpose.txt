@@ -1,0 +1,14 @@
+I want to make a project where I can upload my resume and JD descriptiona and my model will evaluate 
+the code and give me percentage match with what to improve in it
+
+I have started with backend code and have created api section and services section along with main I have also setup venv 
+
+lets go deep and understand some of its things
+
+In main.py I have Fast api and i am including resume jobs and match the I have get method to
+test health
+
+I am alos using read root method to display message when port is hit
+
+Then In my resume one I have a parse_resume function
+In which
