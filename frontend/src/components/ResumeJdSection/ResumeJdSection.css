@@ -1,0 +1,31 @@
+.resume-jd { padding: 1.5rem; }
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.analyze {
+  background: #0A66C2;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 768px) {
+  .columns { grid-template-columns: 1fr; }
+  .controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
+}

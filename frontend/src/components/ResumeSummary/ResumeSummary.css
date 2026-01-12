@@ -1,0 +1,31 @@
+.summary-card h3 {
+  margin: 0 0 0.5rem 0;
+  color: #0A66C2;
+  font-size: 1.05rem;
+}
+
+.meta { margin-bottom: 0.75rem; color: #333; font-size: 0.95rem; }
+
+.skills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.skill-badge {
+  background: rgba(10,102,194,0.08);
+  color: #0A66C2;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.add-skill {
+  background: transparent;
+  border: 1px dashed rgba(10,102,194,0.18);
+  color: #0A66C2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}

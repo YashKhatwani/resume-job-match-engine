@@ -1,0 +1,147 @@
+.resume-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resume-upload-container h3 {
+  margin: 0;
+  color: #0A66C2;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.upload-zone {
+  border: 2px dashed #0A66C2;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(10, 102, 194, 0.03) 0%, rgba(10, 102, 194, 0.01) 100%);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.upload-zone:hover {
+  border-color: #005BA3;
+  background: linear-gradient(135deg, rgba(10, 102, 194, 0.08) 0%, rgba(10, 102, 194, 0.04) 100%);
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.15);
+}
+
+.upload-zone.drag-active {
+  border-color: #005BA3;
+  background: rgba(10, 102, 194, 0.1);
+  transform: scale(1.01);
+}
+
+/* Hide the native file input */
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: #0A66C2;
+}
+
+.upload-text {
+  color: #333;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.upload-hint {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.upload-button {
+  background: #0A66C2;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.upload-button:hover {
+  background: #005BA3;
+  box-shadow: 0 4px 10px rgba(10, 102, 194, 0.3);
+  transform: translateY(-2px);
+}
+
+.upload-button:active {
+  transform: translateY(0);
+}
+
+/* File selected state */
+.file-selected {
+  background: #f0f7ff;
+  border-color: #00A0DC;
+}
+
+.file-selected .upload-icon {
+  color: #00A0DC;
+}
+
+.file-name {
+  color: #0A66C2;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  word-break: break-word;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgba(10, 102, 194, 0.2);
+  border-top-color: #0A66C2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .upload-zone {
+    padding: 1.5rem 1rem;
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+  }
+
+  .upload-text {
+    font-size: 0.95rem;
+  }
+
+  .upload-hint {
+    font-size: 0.85rem;
+  }
+}
