@@ -4,11 +4,12 @@ import './ResumeSection.css';
 import { ResumeSummary } from '../ResumeSummary/ResumeSummary';
 import { ResumeUpload } from '../ResumeUpload/ResumeUpload';
 
-export const ResumeSection = () => {
+export const ResumeSection = ({ onResumeData }) => {
     const [resumeData, setResumeData] = useState(null);
 
   const handleParsed = (data) => {
     setResumeData(data);
+    onResumeData?.(data);
     console.log('Resume parsed:', data);
   };
   return (

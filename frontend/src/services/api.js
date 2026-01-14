@@ -7,7 +7,8 @@ const API = axios.create({
 export const parseResume = (file) => {
   const formData = new FormData();
   formData.append("file", file);
-
+  console.log("file to upload:", file);
+  console.log("formData:", formData);
   return API.post("/resume/parse", formData);
 };
 

@@ -7,40 +7,53 @@ from app.services.matcher import match_resume_to_jd
 router = APIRouter()
 
 
-class ResumeInput(BaseModel):
-    skills: List[str]
-    total_yoe: float
-
-
-class JDInput(BaseModel):
-    job_id: str
+class JDData(BaseModel):
+    jd_id: str
     title: str
     company: str | None = None
-    required_skills: List[str]
-    preferred_skills: List[str]
-    min_yoe: float | None
-    keywords: List[str]
+    text: str
 
 
 class MatchRequest(BaseModel):
-    resume: ResumeInput
-    jobs: List[JDInput]
+    resume_id: str
+    skills: List[str]
+    total_yoe: float
+    roles: List[str] = []
+    job_descriptions: List[JDData]
 
 
 @router.post("")
 def match_jobs(req: MatchRequest):
     results = []
 
-    for job in req.jobs:
+    for jd in req.job_descriptions:
+        # Create resume dict from request
+        resume = {
+            "skills": req.skills,
+            "total_yoe": req.total_yoe,
+        }
+
+        # Create JD dict with parsed text
+        jd_dict = {
+            "job_id": jd.jd_id,
+            "title": jd.title,
+            "company": jd.company or "Unknown",
+            "text": jd.text,
+            "required_skills": [],  # Will be extracted by matcher if needed
+            "preferred_skills": [],
+            "min_yoe": None,
+            "keywords": [],
+        }
+
         match_result = match_resume_to_jd(
-            resume=req.resume.dict(),
-            jd=job.dict()
+            resume=resume,
+            jd=jd_dict
         )
 
         results.append({
-            "job_id": job.job_id,
-            "title": job.title,
-            "company": job.company,
+            "job_id": jd.jd_id,
+            "title": jd.title,
+            "company": jd.company or "Unknown",
             **match_result
         })
 

@@ -13,6 +13,7 @@ export const ResumeUpload = ({ onParsed }) => {
     try {
       const res = await import("../../services/api")
         .then(api => api.parseResume(file));
+      console.log('Upload response:', res);
       onParsed(res.data);
       setSelectedFile(file.name);
     } catch (error) {

@@ -1,0 +1,97 @@
+.jd-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jd-heading {
+  margin: 0 0 0.25rem 0;
+  color: #0A66C2;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.jd-card {
+  background: #fff;
+  border: 1px solid rgba(10,102,194,0.12);
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 6px 14px rgba(10,102,194,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* top row: title, company, remove */
+.jd-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.jd-input-title,
+.jd-input-company {
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(10,102,194,0.14);
+  outline: none;
+  font-size: 0.95rem;
+  color: #222;
+  background: #fbfdff;
+}
+
+.jd-input-company {
+  max-width: 160px;
+}
+
+/* remove button */
+.remove-jd {
+  background: transparent;
+  border: none;
+  color: #d64545;
+  font-size: 1rem;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.remove-jd:hover { background: rgba(214,69,69,0.06); }
+
+/* text area */
+.jd-text {
+  min-height: 96px;
+  resize: vertical;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(10,102,194,0.12);
+  background: #ffffff;
+  font-size: 0.95rem;
+  color: #222;
+  outline: none;
+}
+
+/* controls */
+.jd-controls {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.25rem;
+}
+
+.add-jd {
+  background: #0A66C2;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.add-jd:hover { background: #005BA3; }
+
+/* responsive */
+@media (max-width: 720px) {
+  .jd-row { flex-direction: column; align-items: stretch; }
+  .jd-input-company { max-width: 100%; }
+  .jd-text { min-height: 120px; }
+}

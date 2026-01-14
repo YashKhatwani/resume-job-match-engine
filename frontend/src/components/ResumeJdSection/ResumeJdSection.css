@@ -19,9 +19,63 @@
   background: #0A66C2;
   color: #fff;
   border: none;
-  padding: 0.6rem 1rem;
+  padding: 0.7rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.25);
+}
+
+.analyze:hover:not(:disabled) {
+  background: #005BA3;
+  box-shadow: 0 6px 16px rgba(10, 102, 194, 0.35);
+  transform: translateY(-2px);
+}
+
+.analyze:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.analyze:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.analyze.loading {
+  position: relative;
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sort select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(10, 102, 194, 0.2);
+  border-radius: 6px;
+  background: #fff;
+  color: #0A66C2;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort select:hover {
+  border-color: #0A66C2;
+  box-shadow: 0 2px 8px rgba(10, 102, 194, 0.1);
+}
+
+.sort select:focus {
+  outline: none;
+  border-color: #0A66C2;
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
 }
 
 /* Responsive: stack on small screens */

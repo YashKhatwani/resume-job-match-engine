@@ -1,5 +1,7 @@
 import pdfplumber
 import re
+import datetime
+import calendar
 from .skill_dictionary import SKILL_MAP
 
 def extract_text_from_pdf(file):
@@ -23,31 +25,161 @@ def extract_skills(text: str) -> list[str]:
 
     return sorted(found_skills)
 
+# This is not giving proper year of experience need to debug
 def extract_years_of_experience(text: str) -> float:
+    """
+    Extract years of experience by parsing date ranges.
+    Handles formats like:
+      - "Jan 2018 - Mar 2021"
+      - "2016 - 2019"
+      - "2023 - Present"
+      - "June 2017 to Present"
+    """
+    import datetime
+    import calendar
+
+    text = text or ""
+    text_lower = text.lower()
+    
+    month_map = {
+        "jan": 1, "january": 1,
+        "feb": 2, "february": 2,
+        "mar": 3, "march": 3,
+        "apr": 4, "april": 4,
+        "may": 5,
+        "jun": 6, "june": 6,
+        "jul": 7, "july": 7,
+        "aug": 8, "august": 8,
+        "sep": 9, "sept": 9, "september": 9,
+        "oct": 10, "october": 10,
+        "nov": 11, "november": 11,
+        "dec": 12, "december": 12,
+    }
+
+    def parse_date_token(token: str):
+        token = token.strip().lower()
+        if re.search(r'\bpresent\b|\bcurrent\b|\bnow\b', token):
+            return datetime.date.today()
+
+        # month name + year (e.g., "Jan 2018")
+        for name, mnum in month_map.items():
+            m = re.search(rf"\b{name}\b\s*(\d{{4}})", token, flags=re.I)
+            if m:
+                year = int(m.group(1))
+                return datetime.date(year, mnum, 1)
+
+        # year-only (e.g., "2018")
+        m = re.search(r"\b(19|20)\d{2}\b", token)
+        if m:
+            year = int(m.group(0))
+            return datetime.date(year, 1, 1)
+
+        return None
+
+    intervals = []
+
+    # Pattern 1: Month Year - Month Year (e.g., "Jan 2018 - Mar 2021")
+    month_names = r'(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)'
+    pattern_month_range = re.compile(
+        rf"(?P<start>{month_names}\s+\d{{4}})\s*(?:[-–—]|to)\s*(?P<end>{month_names}\s+\d{{4}}|present|current|now)",
+        flags=re.I
+    )
+
+    for m in pattern_month_range.finditer(text):
+        s_tok = m.group('start')
+        e_tok = m.group('end')
+        s_date = parse_date_token(s_tok)
+        e_date = parse_date_token(e_tok)
+        
+        if s_date and e_date and s_date <= e_date:
+            if e_date.day == 1 and not re.search(r'present|current|now', e_tok, flags=re.I):
+                last_day = calendar.monthrange(e_date.year, e_date.month)[1]
+                e_date = datetime.date(e_date.year, e_date.month, last_day)
+            intervals.append((s_date, e_date))
+
+    # Pattern 2: Year - Year or Year - Present (e.g., "2018 - 2021" or "2023 - Present")
+    pattern_year_range = re.compile(
+        r"\b(?P<start>19|20)(?P<start_year>\d{2})\b\s*(?:[-–—]|to)\s*(?P<end>present|current|now|(?:19|20)\d{2})\b",
+        flags=re.I
+    )
+    
+    for m in pattern_year_range.finditer(text):
+        s_year = int(m.group('start') + m.group('start_year'))
+        e_token = m.group('end').lower()
+        
+        s_date = datetime.date(s_year, 1, 1)
+        
+        if re.search(r'\bpresent\b|\bcurrent\b|\bnow\b', e_token):
+            e_date = datetime.date.today()
+        else:
+            e_year = int(e_token)
+            e_date = datetime.date(e_year, 12, 31)
+        
+        if s_date <= e_date:
+            intervals.append((s_date, e_date))
+
+    # Merge overlapping intervals
+    if intervals:
+        intervals = sorted(intervals, key=lambda x: x[0])
+        merged = []
+        
+        for start, end in intervals:
+            if not merged:
+                merged.append([start, end])
+            else:
+                last_start, last_end = merged[-1]
+                # If intervals overlap or are adjacent, merge them
+                if start <= last_end + datetime.timedelta(days=90):  # 90 days grace period for job transitions
+                    merged[-1][1] = max(last_end, end)
+                else:
+                    merged.append([start, end])
+
+        total_days = 0
+        for s, e in merged:
+            if e >= s:
+                total_days += (e - s).days + 1
+
+        total_years = round(total_days / 365.25, 1)
+        
+        print(f"\n✓ Date ranges found:")
+        for s, e in merged:
+            days = (e - s).days + 1
+            years = round(days / 365.25, 1)
+            print(f"  {s} to {e} ({years} years)")
+        print(f"  Total YOE: {total_years} years\n")
+        
+        return total_years
+
+    # Fallback: Search for numeric YOE patterns
     yoe_patterns = [
-        r'(\d+)\+?\s+years? of experience',
-        r'(\d+)\+?\s+yrs? experience',
-        r'(\d+)\+?\s+years? experience',
-        r'(\d+)\+?\s+yrs? of experience'
+        r"(\d+(?:\.\d+)?)\s*\+?\s*years? of experience",
+        r"(\d+(?:\.\d+)?)\s*\+?\s*yrs? of experience",
+        r"(\d+(?:\.\d+)?)\s*\+?\s*years? experience",
+        r"(\d+(?:\.\d+)?)\s*\+?\s*yrs? experience",
     ]
 
-    total_yoe = 0
+    total_yoe = 0.0
     for pattern in yoe_patterns:
-        matches = re.findall(pattern, text)
+        matches = re.findall(pattern, text, flags=re.I)
         for match in matches:
             try:
                 total_yoe += float(match)
-            except ValueError:
+            except Exception:
                 continue
 
-    return total_yoe
+    if total_yoe > 0:
+        print(f"✓ YOE from keyword patterns: {total_yoe} years\n")
+        return total_yoe
+
+    return 0.0
 
 def parse_resume(file):
     text = extract_text_from_pdf(file)
 
     return {
+        "raw_text": text,
         "skills": extract_skills(text),
-        "total_yoe": extract_total_yoe(text),
+        "total_yoe": extract_years_of_experience(text),
         "roles": extract_roles(text),
     }
 
