@@ -45,13 +45,19 @@ def parse_resume(file: UploadFile = File(...)):
         print(f"Total YOE: {parsed_data.get('total_yoe', 0)}")
         print(f"Roles ({len(parsed_data.get('roles', []))}):")
         print(f"  {parsed_data.get('roles', [])}")
+        print(f"Education ({len(parsed_data.get('education', []))}):")
+        print(f"  {parsed_data.get('education', [])}")
+        print(f"Qualifications ({len(parsed_data.get('qualifications', []))}):")
+        print(f"  {parsed_data.get('qualifications', [])}")
         print(f"========== END DEBUG ==========\n")
 
         return {
             "resume_id": resume_id,
             "skills": parsed_data.get("skills", []),
             "total_yoe": parsed_data.get("total_yoe", 0),
-            "roles": parsed_data.get("roles", [])
+            "roles": parsed_data.get("roles", []),
+            "education": parsed_data.get("education", []),
+            "qualifications": parsed_data.get("qualifications", [])
         }
     except Exception as e:
         print(f"❌ Error parsing resume: {str(e)}")

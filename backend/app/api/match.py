@@ -12,6 +12,12 @@ class JDData(BaseModel):
     title: str
     company: str | None = None
     text: str
+    required_skills: List[str] = []
+    preferred_skills: List[str] = []
+    min_yoe: float | None = None
+    keywords: List[str] = []
+    education: List[str] = []
+    qualifications: List[str] = []
 
 
 class MatchRequest(BaseModel):
@@ -19,6 +25,8 @@ class MatchRequest(BaseModel):
     skills: List[str]
     total_yoe: float
     roles: List[str] = []
+    education: List[str] = []
+    qualifications: List[str] = []
     job_descriptions: List[JDData]
 
 
@@ -31,18 +39,22 @@ def match_jobs(req: MatchRequest):
         resume = {
             "skills": req.skills,
             "total_yoe": req.total_yoe,
+            "education": req.education,
+            "qualifications": req.qualifications,
         }
 
-        # Create JD dict with parsed text
+        # Create JD dict with parsed data
         jd_dict = {
             "job_id": jd.jd_id,
             "title": jd.title,
             "company": jd.company or "Unknown",
             "text": jd.text,
-            "required_skills": [],  # Will be extracted by matcher if needed
-            "preferred_skills": [],
-            "min_yoe": None,
-            "keywords": [],
+            "required_skills": jd.required_skills,
+            "preferred_skills": jd.preferred_skills,
+            "min_yoe": jd.min_yoe,
+            "keywords": jd.keywords,
+            "education": jd.education,
+            "qualifications": jd.qualifications,
         }
 
         match_result = match_resume_to_jd(

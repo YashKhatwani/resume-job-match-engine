@@ -41,6 +41,8 @@ def extract_years_of_experience(text: str) -> float:
     text = text or ""
     text_lower = text.lower()
     
+    print(f"\n📝 DEBUG: Input text to parse:\n{text[:500]}\n")  # ← Debug print
+    
     month_map = {
         "jan": 1, "january": 1,
         "feb": 2, "february": 2,
@@ -85,25 +87,40 @@ def extract_years_of_experience(text: str) -> float:
         flags=re.I
     )
 
+    print("🔍 Pattern 1 (Month Year - Month Year):")
+    matched_positions = set()  # Track which positions Pattern 1 matched
+    
     for m in pattern_month_range.finditer(text):
         s_tok = m.group('start')
         e_tok = m.group('end')
         s_date = parse_date_token(s_tok)
         e_date = parse_date_token(e_tok)
         
+        print(f"  Found: '{s_tok}' to '{e_tok}' -> {s_date} to {e_date}")
+        
         if s_date and e_date and s_date <= e_date:
             if e_date.day == 1 and not re.search(r'present|current|now', e_tok, flags=re.I):
                 last_day = calendar.monthrange(e_date.year, e_date.month)[1]
                 e_date = datetime.date(e_date.year, e_date.month, last_day)
             intervals.append((s_date, e_date))
+            matched_positions.add((m.start(), m.end()))  # Track match position
+            print(f"    ✓ Added to intervals")
 
     # Pattern 2: Year - Year or Year - Present (e.g., "2018 - 2021" or "2023 - Present")
+    # Only match if NOT already matched by Pattern 1
     pattern_year_range = re.compile(
         r"\b(?P<start>19|20)(?P<start_year>\d{2})\b\s*(?:[-–—]|to)\s*(?P<end>present|current|now|(?:19|20)\d{2})\b",
         flags=re.I
     )
     
+    print("\n🔍 Pattern 2 (Year - Year):")
     for m in pattern_year_range.finditer(text):
+        # Skip if this match overlaps with Pattern 1
+        overlap = any(m.start() < end and m.end() > start for start, end in matched_positions)
+        if overlap:
+            print(f"  Skipped (already matched by Pattern 1): '{m.group(0)}'")
+            continue
+        
         s_year = int(m.group('start') + m.group('start_year'))
         e_token = m.group('end').lower()
         
@@ -115,8 +132,13 @@ def extract_years_of_experience(text: str) -> float:
             e_year = int(e_token)
             e_date = datetime.date(e_year, 12, 31)
         
+        print(f"  Found: '{s_year}' to '{e_token}' -> {s_date} to {e_date}")
+        
         if s_date <= e_date:
             intervals.append((s_date, e_date))
+            print(f"    ✓ Added to intervals")
+
+    print(f"\n📊 All intervals before merging: {intervals}\n")
 
     # Merge overlapping intervals
     if intervals:
@@ -173,14 +195,38 @@ def extract_years_of_experience(text: str) -> float:
 
     return 0.0
 
+def extract_work_experience_section(text: str) -> str:
+    """Extract only the work experience section from resume text."""
+    section_pattern = r"(?i)(work\s+experience|professional\s+experience|experience|employment\s+history|career\s+history)"
+    end_pattern = r"(?i)(education|skills|certifications|projects|awards|languages|technical\s+skills|summary|objective)"
+    
+    section_match = re.search(section_pattern, text)
+    if not section_match:
+        return ""
+    
+    start_pos = section_match.start()
+    remaining_text = text[start_pos + len(section_match.group(0)):]
+    end_match = re.search(end_pattern, remaining_text)
+    
+    if end_match:
+        end_pos = start_pos + len(section_match.group(0)) + end_match.start()
+        return text[start_pos:end_pos]
+    
+    return remaining_text
+
 def parse_resume(file):
     text = extract_text_from_pdf(file)
+    experience_section = extract_work_experience_section(text)  # ← Extract first
+
+    # print("Extracted Work Experience Section:\n", experience_section)
 
     return {
         "raw_text": text,
         "skills": extract_skills(text),
-        "total_yoe": extract_years_of_experience(text),
+        "total_yoe": extract_years_of_experience(experience_section),
         "roles": extract_roles(text),
+        "education": extract_education(text),
+        "qualifications": extract_qualifications(text),
     }
 
 def extract_roles(text: str) -> list[str]:
@@ -195,3 +241,44 @@ def extract_roles(text: str) -> list[str]:
             found_roles.add(match.lower())
 
     return sorted(found_roles)
+
+def extract_education(text: str) -> list[str]:
+    """Extract education level from resume (Bachelor's, Master's, PhD, etc.)"""
+    found = set()
+    
+    education_levels = {
+        "master": ["master's", "master degree", "m.s.", "m.a.", "m.eng", "ms computer science"],
+        "bachelor": ["bachelor's", "bachelor degree", "b.s.", "b.a.", "b.eng", "bs computer science"],
+        "phd": ["phd", "doctorate", "doctoral degree"]
+    }
+    
+    for level, variants in education_levels.items():
+        for variant in variants:
+            if variant in text.lower():
+                found.add(level)
+                break
+    
+    return sorted(found)
+
+def extract_qualifications(text: str) -> list[str]:
+    """Extract qualifications like AI knowledge, Agile, SCRUM, etc. from resume"""
+    qualifications = [
+        "agile",
+        "scrum",
+        "ai",
+        "artificial intelligence",
+        "machine learning",
+        "generative ai",
+        "devops",
+        "cloud",
+        "aws",
+        "gcp",
+        "azure"
+    ]
+    
+    found = set()
+    for qual in qualifications:
+        if qual in text.lower():
+            found.add(qual)
+    
+    return sorted(found)

@@ -4,7 +4,7 @@ import './ResumeJdSection.css';
 import { JDInput } from '../JDInput/JDInput';
 import { ResumeSection } from '../ResumeSection/ResumeSection';
 import ResultsTable from '../ResultsTable/ResultsTable';
-import { matchJobs } from '../../services/api';
+import { matchJobs, parseJobs } from '../../services/api';
 
 export const ResumeJdSection = () => {
   const [resumeData, setResumeData] = useState(null);
@@ -34,22 +34,39 @@ export const ResumeJdSection = () => {
 
     setLoading(true);
     try {
+      // Step 1: Parse JDs to extract company, title, skills
+      console.log('📝 Parsing job descriptions...');
+      const parsedJDsResponse = await parseJobs(jds);
+      const parsedJDs = parsedJDsResponse.data.jobs;
+      console.log('✓ JDs parsed:', parsedJDs);
+
+      // Step 2: Match resume with parsed JDs
       const payload = {
         resume_id: resumeData.resume_id,
         skills: resumeData.skills || [],
         total_yoe: resumeData.total_yoe || 0,
         roles: resumeData.roles || [],
-        job_descriptions: jds.map(jd => ({
+        education: resumeData.education || [],
+        qualifications: resumeData.qualifications || [],
+        job_descriptions: parsedJDs.map(jd => ({
           jd_id: jd.id,
-          title: jd.title || 'Untitled',
-          company: jd.company || 'Unknown',
-          text: jd.text,
+          title: jd.title,
+          company: jd.company,
+          text: jd.raw_text,
+          required_skills: jd.required_skills || [],
+          preferred_skills: jd.preferred_skills || [],
+          min_yoe: jd.min_yoe,
+          keywords: jd.keywords || [],
+          education: jd.education || [],
+          qualifications: jd.qualifications || [],
         })),
       };
 
+      console.log('🔄 Matching resume with JDs...');
       const response = await matchJobs(payload);
       const sortedResults = sortResults(response.data.results || [], sortBy);
       setResults(sortedResults);
+      console.log('✓ Match complete:', sortedResults);
     } catch (error) {
       console.error('Error analyzing jobs:', error);
       alert('Failed to analyze jobs. Please check your input and try again.');
@@ -109,7 +126,7 @@ export const ResumeJdSection = () => {
         </div>
       </section>
 
-      {results.length > 0 && <ResultsTable results={results} />}
+      {results.length > 0 && <ResultsTable results={results} resumeYoe={resumeData?.total_yoe} />}
     </>
   );
 };
