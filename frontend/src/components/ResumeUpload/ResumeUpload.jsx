@@ -8,7 +8,7 @@ export const ResumeUpload = ({ onParsed }) => {
 
   const handleUpload = async (file) => {
     if (!file) return;
-
+    console.log("Uploading file:", file);
     setLoading(true);
     try {
       const res = await import("../../services/api")

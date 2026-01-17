@@ -21,7 +21,14 @@ def extract_skills(text: str):
 
     for canonical, variants in SKILL_MAP.items():
         for variant in variants:
-            pattern = r"\b" + re.escape(variant) + r"\b"
+            # For skills with special characters like C++, handle differently
+            if any(char in variant for char in ['+', '#', '.']):
+                # Don't use word boundaries for special characters
+                pattern = re.escape(variant)
+            else:
+                # Use word boundaries for normal alphanumeric skills
+                pattern = r"\b" + re.escape(variant) + r"\b"
+            
             match = re.search(pattern, text, re.IGNORECASE)
 
             if match:

@@ -18,8 +18,15 @@ def extract_skills(text: str) -> list[str]:
 
     for canonical, variants in SKILL_MAP.items():
         for variant in variants:
-            pattern = r"\b" + re.escape(variant) + r"\b"
-            if re.search(pattern, text):
+            # For skills with special characters like C++, handle differently
+            if any(char in variant for char in ['+', '#', '.']):
+                # Don't use word boundaries for special characters
+                pattern = re.escape(variant)
+            else:
+                # Use word boundaries for normal alphanumeric skills
+                pattern = r"\b" + re.escape(variant) + r"\b"
+            
+            if re.search(pattern, text, re.IGNORECASE):
                 found_skills.add(canonical)
                 break
 
@@ -247,14 +254,26 @@ def extract_education(text: str) -> list[str]:
     found = set()
     
     education_levels = {
-        "master": ["master's", "master degree", "m.s.", "m.a.", "m.eng", "ms computer science"],
-        "bachelor": ["bachelor's", "bachelor degree", "b.s.", "b.a.", "b.eng", "bs computer science"],
-        "phd": ["phd", "doctorate", "doctoral degree"]
+        "bachelor": [
+            "bachelor's", "bachelor degree", "b.s.", "b.a.", "b.eng", 
+            "bs computer science", "bachelor of", "b. tech", "btech",
+            "bachelor"
+        ],
+        "master": [
+            "master's", "master degree", "m.s.", "m.a.", "m.eng", 
+            "ms computer science", "master of", "m. tech", "mtech",
+            "master"
+        ],
+        "phd": [
+            "phd", "doctorate", "doctoral degree", "ph.d.", "doctor of"
+        ]
     }
+    
+    text_lower = text.lower()
     
     for level, variants in education_levels.items():
         for variant in variants:
-            if variant in text.lower():
+            if variant in text_lower:
                 found.add(level)
                 break
     
