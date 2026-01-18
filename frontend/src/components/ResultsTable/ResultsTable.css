@@ -188,6 +188,25 @@
   line-height: 1.5;
 }
 
+.suggestions-section {
+  background-color: #f0f8ff;
+  border-left: 4px solid #4CAF50;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
 /* Responsive */
 @media (max-width: 768px) {
   .results-container {

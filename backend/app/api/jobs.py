@@ -21,8 +21,8 @@ def parse_jobs(req: JobsRequest):
 
         results.append({
             "id": job.id,
-            "title": "Not specified",  # TODO: Add title extraction to jd_parser
-            "company": "Not specified",  # TODO: Add company extraction to jd_parser
+            "title": parsed.get("title", "Not specified"),
+            "company": parsed.get("company", "Not specified"),
             "required_skills": parsed.get("required_skills", []),
             "preferred_skills": parsed.get("preferred_skills", []),
             "min_yoe": parsed.get("min_yoe"),

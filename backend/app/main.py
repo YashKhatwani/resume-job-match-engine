@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import resume, jobs, match
+from app.api import resume, jobs, match ,ai_suggestions as ai
 
 app = FastAPI(title="Resume Job Match Engine")
 
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(resume.router, prefix="/resume")
 app.include_router(jobs.router, prefix="/jobs")
 app.include_router(match.router, prefix="/match")
+app.include_router(ai.router, prefix="/ai")
 
 @app.get("/health")
 def health():

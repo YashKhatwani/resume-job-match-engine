@@ -17,3 +17,6 @@ export const parseJobs = (jobs) =>
 
 export const matchJobs = (payload) =>
   API.post("/match", payload);
+
+export const getAISuggestions = (data) =>
+  API.post("/ai/suggestions", data);

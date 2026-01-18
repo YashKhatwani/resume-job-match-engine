@@ -155,14 +155,45 @@ def extract_qualifications(text: str) -> list[str]:
     print()
     return sorted(found)
 
+def extract_job_title(text: str) -> str:
+    """Extract job title from the beginning of the JD"""
+    lines = text.split("\n")
+    for line in lines:
+        line = line.strip()
+        if len(line) > 0 and len(line) < 100:  # Job titles are usually short
+            # Skip common header words
+            if not any(skip in line.lower() for skip in ["job description", "position", "about us", "company", "we are"]):
+                print(f"  💼 Extracted job title: '{line}'")
+                return line
+    print(f"  💼 No job title found")
+    return "Not specified"
+
+def extract_company(text: str) -> str:
+    """Extract company name - usually appears early or in About Us section"""
+    lines = text.split("\n")
+    for i, line in enumerate(lines[:10]):  # Check first 10 lines
+        line_lower = line.lower().strip()
+        if "company" in line_lower or "about" in line_lower:
+            # Check next line for company name
+            if i + 1 < len(lines):
+                company = lines[i + 1].strip()
+                if company and len(company) < 100:
+                    print(f"  🏢 Extracted company: '{company}'")
+                    return company
+    print(f"  🏢 No company found")
+    return "Not specified"
+
 def parse_jd(jd_text: str):
     text = normalize_text(jd_text)
+    original_text = jd_text  # Keep original for better title/company extraction
 
     required_skills, preferred_skills = extract_skills(text)
     min_yoe = extract_min_yoe(text)
     keywords = extract_keywords(text)
     education = extract_education_requirements(text)
     qualifications = extract_qualifications(text)
+    title = extract_job_title(original_text)
+    company = extract_company(original_text)
 
     return {
         "required_skills": required_skills,
@@ -170,6 +201,8 @@ def parse_jd(jd_text: str):
         "min_yoe": min_yoe,
         "keywords": keywords,
         "education": education,
-        "qualifications": qualifications
+        "qualifications": qualifications,
+        "title": title,
+        "company": company
     }
 

@@ -123,6 +123,18 @@ const ResultCard = ({ result, resumeYoe }) => {
             <p className="gap-text">You have {resumeYoe} years - matches requirement</p>
           </div>
         )}
+
+        {/* AI Suggestions */}
+        {result.suggestions && result.suggestions.length > 0 && (
+          <div className="result-section suggestions-section">
+            <h4 className="section-label">💡Suggestions to Improve Match (AI-assisted)</h4>
+            <div className="suggestions-list">
+              {result.suggestions.map((suggestion, i) => (
+                <div key={i} className="suggestion-item">{suggestion}</div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {result.explanation && (
@@ -134,7 +146,7 @@ const ResultCard = ({ result, resumeYoe }) => {
   );
 };
 
-export default function ResultsTable({ results, resumeYoe }) {
+export default function ResultsTable({ results, resumeYoe, suggestions }) {
   if (!results || results.length === 0) {
     return (
       <div className="results-empty">
@@ -150,8 +162,12 @@ export default function ResultsTable({ results, resumeYoe }) {
         <p className="result-count">{results.length} job{results.length !== 1 ? 's' : ''} analyzed</p>
       </div>
       <div className="results-list">
-        {results.map(result => (
-          <ResultCard key={result.job_id || `${result.title}-${result.company}`} result={result} resumeYoe={resumeYoe} />
+        {results.map((result, index) => (
+          <ResultCard 
+            key={result.job_id || `${result.title}-${result.company}`} 
+            result={{...result, suggestions: index === 0 ? suggestions : []}} 
+            resumeYoe={resumeYoe} 
+          />
         ))}
       </div>
     </div>

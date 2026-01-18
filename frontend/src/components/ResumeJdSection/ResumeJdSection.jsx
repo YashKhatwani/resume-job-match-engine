@@ -4,7 +4,7 @@ import './ResumeJdSection.css';
 import { JDInput } from '../JDInput/JDInput';
 import { ResumeSection } from '../ResumeSection/ResumeSection';
 import ResultsTable from '../ResultsTable/ResultsTable';
-import { matchJobs, parseJobs } from '../../services/api';
+import { matchJobs, parseJobs, getAISuggestions } from '../../services/api';
 
 export const ResumeJdSection = () => {
   const [resumeData, setResumeData] = useState(null);
@@ -12,6 +12,7 @@ export const ResumeJdSection = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('match');
+  const [suggestions, setSuggestions] = useState([]);
 
   const handleResumeData = (data) => {
     setResumeData(data);
@@ -67,6 +68,25 @@ export const ResumeJdSection = () => {
       const sortedResults = sortResults(response.data.results || [], sortBy);
       setResults(sortedResults);
       console.log('✓ Match complete:', sortedResults);
+
+      // Step 3: Get AI suggestions for top match
+      if (sortedResults.length > 0) {
+        const topMatch = sortedResults[0];
+        console.log('🤖 Getting AI suggestions...');
+        try {
+          const suggestionsResponse = await getAISuggestions({
+            missing_required: topMatch.missing_required || [],
+            missing_preferred: topMatch.missing_preferred || [],
+            experience_gap: topMatch.experience_gap || 0,
+            jd_keywords: topMatch.keywords || []
+          });
+          console.log('✓ AI suggestions:', suggestionsResponse.data);
+          setSuggestions(suggestionsResponse.data.suggestions || []);
+        } catch (suggestionError) {
+          console.warn('AI suggestions failed:', suggestionError);
+          setSuggestions([]);
+        }
+      }
     } catch (error) {
       console.error('Error analyzing jobs:', error);
       alert('Failed to analyze jobs. Please check your input and try again.');
@@ -126,7 +146,7 @@ export const ResumeJdSection = () => {
         </div>
       </section>
 
-      {results.length > 0 && <ResultsTable results={results} resumeYoe={resumeData?.total_yoe} />}
+      {results.length > 0 && <ResultsTable results={results} resumeYoe={resumeData?.total_yoe} suggestions={suggestions} />}
     </>
   );
 };
